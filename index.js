@@ -32,6 +32,7 @@ async function run() {
 
         //Database and Collections Here
         const userCollection = client.db("summerCamp").collection("user");
+        const classCollection = client.db("summerCamp").collection("class");
 
         // All CRUD Operation Here
 
@@ -56,7 +57,12 @@ async function run() {
             res.send(result)
         });
 
+        //Class Side
 
+        app.get('/classes', async (req, res) => {
+            const result = await classCollection.find().toArray()
+            res.send(result)
+        });
 
 
 
