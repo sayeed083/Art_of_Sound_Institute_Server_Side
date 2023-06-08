@@ -180,7 +180,9 @@ async function run() {
         //Instructors Side
 
         app.get('/instructors', async (req, res) => {
-            const result = await instructorCollection.find().toArray()
+            const sortField = req.query.sortField || 'numberOfClassesTaken';
+            const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
+            const result = await instructorCollection.find().sort({ [sortField]: sortOrder }).toArray()
             res.send(result)
         });
 
