@@ -171,7 +171,9 @@ async function run() {
         //Class Side
 
         app.get('/classes', async (req, res) => {
-            const result = await classCollection.find().toArray()
+            const sortField = req.query.sortField || 'students';
+            const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
+            const result = await classCollection.find().sort({ [sortField]: sortOrder }).toArray()
             res.send(result)
         });
 
