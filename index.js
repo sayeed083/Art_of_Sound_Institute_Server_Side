@@ -138,7 +138,7 @@ async function run() {
 
 
 
-
+        //for update a role
 
         app.patch('/users/admin/:id', async (req, res) => {
             const id = req.params.id;
@@ -163,6 +163,7 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
+
 
 
 
@@ -197,6 +198,19 @@ async function run() {
             const result = await classCollection.find(query).toArray();
             res.send(result);
 
+        });
+
+
+        app.patch('/classes/status/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const newStatus = {
+                $set: {
+                    status: 'approve'
+                },
+            };
+            const result = await classCollection.updateOne(filter, newStatus)
+            res.send(result)
         })
 
 
