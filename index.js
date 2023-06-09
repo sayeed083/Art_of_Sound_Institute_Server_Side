@@ -180,9 +180,42 @@ async function run() {
 
 
 
-        app.post('/classes',  async (req, res) => {
+        // For Showing Instructor Specific Selected Class List
+        app.get('/myInstructorClass', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+
+            if (!email) {
+                res.send([]);
+            }
+
+            const decodedEmail = req.decoded.email;
+            if (email !== decodedEmail) {
+                return res.status(403).send({ error: true, message: 'Forbidden access' })
+            }
+
+            const query = { email: email };
+            const result = await classCollection.find(query).toArray();
+            res.send(result);
+
+        })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        app.post('/classes', async (req, res) => {
             const newCls = req.body;
             newCls.status = 'pending';
+            newCls.students = 0;
             const result = await classCollection.insertOne(newCls)
             res.send(result);
         })
@@ -209,7 +242,7 @@ async function run() {
 
             if (!email) {
                 res.send([]);
-            } 
+            }
 
             const decodedEmail = req.decoded.email;
             if (email !== decodedEmail) {
