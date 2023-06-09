@@ -53,6 +53,7 @@ async function run() {
         const userCollection = client.db("summerCamp").collection("user");
         const classCollection = client.db("summerCamp").collection("class");
         const instructorCollection = client.db("summerCamp").collection("instructor");
+        const selectedClassCollection = client.db("summerCamp").collection("selectedClass");
 
         // All CRUD Operation Here
 
@@ -189,6 +190,40 @@ async function run() {
         });
 
 
+
+
+
+        app.get('/selectedClass', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+
+            if (!email) {
+                res.send([]);
+            } 
+
+            const decodedEmail = req.decoded.email;
+            if (email !== decodedEmail) {
+                return res.status(403).send({ error: true, message: 'Forbidden access' })
+            }
+
+            const query = { email: email };
+            const result = await selectedClassCollection.find(query).toArray();
+            res.send(result);
+
+        })
+
+
+
+
+
+
+
+
+        app.post('/selectedClass', async (req, res) => {
+            const item = req.body;
+            console.log(item);
+            const result = await selectedClassCollection.insertOne(item);
+            res.send(result);
+        });
 
 
 
