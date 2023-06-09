@@ -180,6 +180,17 @@ async function run() {
 
 
 
+        app.post('/classes',  async (req, res) => {
+            const newCls = req.body;
+            newCls.status = 'pending';
+            const result = await classCollection.insertOne(newCls)
+            res.send(result);
+        })
+
+
+
+
+
         //Instructors Side
 
         app.get('/instructors', async (req, res) => {
@@ -225,6 +236,13 @@ async function run() {
             res.send(result);
         });
 
+
+        app.delete('/selectedClass/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await selectedClassCollection.deleteOne(query);
+            res.send(result);
+        })
 
 
 
