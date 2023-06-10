@@ -180,6 +180,19 @@ async function run() {
         });
 
 
+        //For getting classes by id
+
+        app.get('/classes/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await classCollection.findOne(query);
+            res.send(result);
+        })
+
+
+
+
+
 
         // For Showing Instructor Specific Selected Class List
         app.get('/myInstructorClass', verifyJWT, async (req, res) => {
@@ -212,6 +225,34 @@ async function run() {
             const result = await classCollection.updateOne(filter, newStatus)
             res.send(result)
         })
+        app.patch('/classes/statusDeny/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const newDeniedStatus = {
+                $set: {
+                    status: 'denied'
+                },
+            };
+            const result = await classCollection.updateOne(filter, newDeniedStatus)
+            res.send(result)
+        })
+
+        app.patch('/classes/feedback/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+
+            const feedback = req.body.feedback;
+            const giveFeedBack = {
+                $set: {
+                    feedback: feedback
+                },
+            };
+
+            const result = await classCollection.updateOne(filter, giveFeedBack);
+
+            res.send(result);
+        });
+
 
 
 
