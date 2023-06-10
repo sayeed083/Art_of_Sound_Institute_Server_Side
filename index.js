@@ -2,8 +2,9 @@ const express = require('express')
 const app = express()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
 require("dotenv").config();
+const jwt = require('jsonwebtoken');
+const stripe = require('stripe')(process.env.PAYMENT_SK)
 const port = process.env.PORT || 5000
 
 
@@ -54,6 +55,7 @@ async function run() {
         const classCollection = client.db("summerCamp").collection("class");
         const instructorCollection = client.db("summerCamp").collection("instructor");
         const selectedClassCollection = client.db("summerCamp").collection("selectedClass");
+        const paymentCollection = client.db("summerCamp").collection("payment");
 
         // All CRUD Operation Here
 
@@ -73,6 +75,15 @@ async function run() {
             }
             next();
         }
+        // const verifyInstructor = async (req, res, next) => {
+        //     const email = req.decoded.email;
+        //     const query = { email: email }
+        //     const user = await userCollection.findOne(query);
+        //     if (user?.role !== 'instructor') {
+        //         return res.status(403).send({ error: true, message: 'forbidden message' });
+        //     }
+        //     next();
+        // }
 
 
 
@@ -123,13 +134,14 @@ async function run() {
         // For Use A Hook For Instructor Validation
         app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
+            console.log('Instructor Emaill',email);
             if (req.decoded.email !== email) {
-                res.send({ admin: false })
+                res.send({ instructor: false })
             }
 
             const query = { email: email }
             const user = await userCollection.findOne(query);
-            const result = { admin: user?.role === 'instructor' }
+            const result = { instructor: user?.role === 'instructor' }
             res.send(result);
         })
 
@@ -331,7 +343,45 @@ async function run() {
             const query = { _id: new ObjectId(id) };
             const result = await selectedClassCollection.deleteOne(query);
             res.send(result);
+        });
+
+
+
+        // Payment CRUD HERE
+
+
+
+        app.post('/create-payment-intent',verifyJWT, async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+
+            console.log(price, amount);
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
         })
+
+
+        app.post('/payments', verifyJWT, async(req, res) => {
+            const payment = req.body;
+            const result = await paymentCollection.insertOne(payment);
+            res.send(result)
+        })
+
+
+
+
+
+
+
+
+
+
 
 
 
