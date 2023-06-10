@@ -260,13 +260,6 @@ async function run() {
 
 
 
-
-
-
-
-
-
-
         app.post('/classes', async (req, res) => {
             const newCls = req.body;
             newCls.status = 'pending';
@@ -308,7 +301,15 @@ async function run() {
             const result = await selectedClassCollection.find(query).toArray();
             res.send(result);
 
+        });
+
+        app.get('/selectedClass/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await selectedClassCollection.findOne(query);
+            res.send(result);
         })
+
 
 
 
