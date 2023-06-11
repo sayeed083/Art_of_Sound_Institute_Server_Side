@@ -387,7 +387,27 @@ async function run() {
         });
 
 
-        //TODO PAYMENT HISTORY
+        //Payment history
+
+        app.get('/paymentsh', async (req, res) => {
+            const sortField = req.query.sortField || 'date';
+            const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
+
+            const result = await paymentCollection.find().sort({ [sortField]: sortOrder }).toArray()
+            res.send(result)
+        });
+
+
+
+        // const sortField = req.query.sortField || 'numberOfClassesTaken';
+        // const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
+        // .sort({ [sortField]: sortOrder })
+
+
+
+
+
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
