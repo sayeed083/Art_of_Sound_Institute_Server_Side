@@ -18,7 +18,7 @@ const verifyJWT = (req, res, next) => {
     if (!authorization) {
         return res.status(401).send({ error: true, message: 'unauthorized access' });
     }
-    // bearer token
+    // Bearer Token Generate!
     const token = authorization.split(' ')[1];
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
@@ -145,11 +145,6 @@ async function run() {
             res.send(result);
         })
 
-
-
-
-
-
         //for update a role
 
         app.patch('/users/admin/:id', async (req, res) => {
@@ -202,11 +197,8 @@ async function run() {
         })
 
 
-
-
-
-
         // For Showing Instructor Specific Selected Class List
+
         app.get('/myInstructorClass', verifyJWT, async (req, res) => {
             const email = req.query.email;
 
@@ -267,10 +259,23 @@ async function run() {
 
 
 
+        app.patch('/classes/updateMyClass/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updateClasses = req.body;
+            const updatingClass = {
+                $set: {
+                    price: updateClasses.price,
+                    availableSeats: updateClasses.availableSeats
+                }
+
+            }
+            const result = await classCollection.updateOne(filter, updatingClass, options)
+            res.send(result);
 
 
-
-
+        })
 
         app.post('/classes', async (req, res) => {
             const newCls = req.body;
@@ -295,7 +300,7 @@ async function run() {
 
 
 
-
+        //Selected Class Side
 
         app.get('/selectedClass', verifyJWT, async (req, res) => {
             const email = req.query.email;
@@ -321,13 +326,6 @@ async function run() {
             const result = await selectedClassCollection.findOne(query);
             res.send(result);
         })
-
-
-
-
-
-
-
 
 
         app.post('/selectedClass', async (req, res) => {
@@ -371,27 +369,6 @@ async function run() {
 
 
 
-        // app.post('/payments', verifyJWT, async(req, res) => {
-        //     const payment = req.body;
-        //     const result = await paymentCollection.insertOne(payment);
-        //     res.send(result)
-        // })
-        // app.post('/payments', verifyJWT, async (req, res) => {
-        //     const payment = req.body;
-        //     const result = await paymentCollection.insertOne(payment);
-
-
-
-        //     const filter = { _id: new ObjectId(payment.selecteddClass) };
-        //     const update = { $set: { payment: true } }; 
-
-        //     const rr = await selectedClassCollection.updateOne(filter, update);
-
-        //     res.send({result, rr});
-        //   });
-
-
-
         app.post('/payments', verifyJWT, async (req, res) => {
             const payment = req.body;
             const result = await paymentCollection.insertOne(payment);
@@ -402,34 +379,15 @@ async function run() {
 
             const classFilter = { _id: new ObjectId(payment.onlyAllClass) };
             const classUpdate = {
-                $inc: {availableSeats: -1, students: 1 }};
+                $inc: { availableSeats: -1, students: 1 }
+            };
             const classUpdateResult = await classCollection.updateOne(classFilter, classUpdate);
 
             res.send({ result, selectedClassUpdateResult, classUpdateResult });
         });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        //TODO PAYMENT HISTORY
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
