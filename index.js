@@ -48,6 +48,8 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
+
+        // TODO
         await client.connect();
 
         //Database and Collections Here
@@ -297,6 +299,19 @@ async function run() {
             const result = await instructorCollection.find().sort({ [sortField]: sortOrder }).toArray()
             res.send(result)
         });
+
+        app.post('/instructors', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email }
+            const existUser = await instructorCollection.findOne(query)
+            console.log("Already Here:", existUser);
+            if (existUser) {
+                return res.send({ message: 'User Already Exists' })
+            }
+            const result = await instructorCollection.insertOne(user)
+            res.send(result)
+        });
+
 
 
 
