@@ -134,7 +134,7 @@ async function run() {
         // For Use A Hook For Instructor Validation
         app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
-            console.log('Instructor Emaill',email);
+            console.log('Instructor Emaill', email);
             if (req.decoded.email !== email) {
                 res.send({ instructor: false })
             }
@@ -332,6 +332,7 @@ async function run() {
 
         app.post('/selectedClass', async (req, res) => {
             const item = req.body;
+            item.payment = false;
             console.log(item);
             const result = await selectedClassCollection.insertOne(item);
             res.send(result);
@@ -351,7 +352,7 @@ async function run() {
 
 
 
-        app.post('/create-payment-intent',verifyJWT, async (req, res) => {
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
             const { price } = req.body;
             const amount = parseInt(price * 100);
 
@@ -367,11 +368,52 @@ async function run() {
         })
 
 
-        app.post('/payments', verifyJWT, async(req, res) => {
+
+
+
+        // app.post('/payments', verifyJWT, async(req, res) => {
+        //     const payment = req.body;
+        //     const result = await paymentCollection.insertOne(payment);
+        //     res.send(result)
+        // })
+        // app.post('/payments', verifyJWT, async (req, res) => {
+        //     const payment = req.body;
+        //     const result = await paymentCollection.insertOne(payment);
+
+
+
+        //     const filter = { _id: new ObjectId(payment.selecteddClass) };
+        //     const update = { $set: { payment: true } }; 
+
+        //     const rr = await selectedClassCollection.updateOne(filter, update);
+
+        //     res.send({result, rr});
+        //   });
+
+
+
+        app.post('/payments', verifyJWT, async (req, res) => {
             const payment = req.body;
             const result = await paymentCollection.insertOne(payment);
-            res.send(result)
-        })
+
+            const selectedClassFilter = { _id: new ObjectId(payment.selecteddClass) };
+            const selectedClassUpdate = { $set: { payment: true } };
+            const selectedClassUpdateResult = await selectedClassCollection.updateOne(selectedClassFilter, selectedClassUpdate);
+
+            const classFilter = { _id: new ObjectId(payment.onlyAllClass) };
+            const classUpdate = {
+                $inc: {availableSeats: -1, students: 1 }};
+            const classUpdateResult = await classCollection.updateOne(classFilter, classUpdate);
+
+            res.send({ result, selectedClassUpdateResult, classUpdateResult });
+        });
+
+
+
+
+
+
+
 
 
 
